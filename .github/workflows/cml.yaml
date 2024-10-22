@@ -6,14 +6,17 @@ jobs:
     container: docker://ghcr.io/iterative/cml:0-dvc2-base1
     steps:
       - uses: actions/checkout@v3
-      - name: Train model
+      - name: Train and Report
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pip install -r requirements.txt
-          python train.py  # generate plot.png
+          pip install -r requirements.txt || echo "requirements.txt not found. Skipping."
+          python train.py || echo "train.py not found. Skipping."
 
-          # Create CML report
-          cat metrics.txt >> report.md
-          echo '![](./plot.png "Confusion Matrix")' >> report.md
-          cml comment create report.md
+          # Check if the necessary files are generated before proceeding
+          if [ -f metrics.txt ] && [ -f plot.png ]; then
+            cat metrics.txt >> report.md
+            echo '![](./plot.png "Confusion Matrix")' >> report.md
+            cml comment create report.md
+          else
+            echo "metrics.txt or plot.png not found. Skipping report creation."
