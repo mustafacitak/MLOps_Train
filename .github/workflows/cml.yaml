@@ -10,11 +10,10 @@ jobs:
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set +e  # Devam etme modu, herhangi bir hatayı yoksayar
+          set +e
           pip install -r requirements.txt || true
           python train.py || true
 
-          # Dosyalar mevcutsa raporu oluşturur, aksi halde işlemi bitirir
           if [ -f metrics.txt ] && [ -f plot.png ]; then
             cat metrics.txt >> report.md
             echo '![](./plot.png "Confusion Matrix")' >> report.md
