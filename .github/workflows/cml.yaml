@@ -10,13 +10,16 @@ jobs:
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pip install -r requirements.txt || echo "requirements.txt not found. Skipping."
-          python train.py || echo "train.py not found. Skipping."
+          set +e  # Devam etme modu, herhangi bir hatayı yoksayar
+          pip install -r requirements.txt || true
+          python train.py || true
 
-          # Check if the necessary files are generated before proceeding
+          # Dosyalar mevcutsa raporu oluşturur, aksi halde işlemi bitirir
           if [ -f metrics.txt ] && [ -f plot.png ]; then
             cat metrics.txt >> report.md
             echo '![](./plot.png "Confusion Matrix")' >> report.md
             cml comment create report.md
           else
             echo "metrics.txt or plot.png not found. Skipping report creation."
+          fi
+        shell: bash
